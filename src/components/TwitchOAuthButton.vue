@@ -1,5 +1,7 @@
 <template>
-  <a :href="oauthURL">
+  <a
+    class="oauth-button"
+    :href="oauthURL">
     Twitch OAuth
   </a>
 </template>
@@ -29,7 +31,6 @@ export default {
   },
   created() {
     if(window.location.hash) {
-      console.log('ttrying');
       let params;
       try {
         params = window.location.hash
@@ -52,6 +53,16 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+.oauth-button {
+  color: #FFF;
+  background-color: #6441a5;
+  border-radius: 5px;
+  text-decoration: none;
+  padding: 4px 10px;
 
+  &:hover {
+    background-color: lighten(#6441a5,10%);
+  }
+}
 </style>

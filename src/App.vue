@@ -1,11 +1,16 @@
 <template>
   <div id="app">
     <twitch-oauth-button
+      v-if="!token"
       clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
       :redirectURI="uri"
       scope="chat:read chat:edit"
       @access-token="token = $event"
       />
+    <div
+      v-else>
+      Authed!
+    </div>
     <horizontal-twitch-chat-scroller
       :token="token"/>
   </div>
@@ -36,12 +41,15 @@ export default {
 </script>
 
 <style>
+body, html {
+  background-color: #000;
+  color: #FFF;
+  padding: 0;
+  margin: 0;
+}
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
