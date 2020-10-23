@@ -18,11 +18,13 @@
 
 <script>
 import { ChatClient } from 'twitch-chat-client';
-//import { ApiClient } from 'twitch';
+import { ApiClient } from 'twitch';
 import { StaticAuthProvider } from 'twitch-auth';
 
 import HorizontalTwitchChatScroller from "./components/HorizontalTwitchChatScroller.vue";
 import TwitchOauthButton from "./components/TwitchOAuthButton.vue";
+
+const twitchClientId = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
 
 export default {
   name: "App",
@@ -47,16 +49,41 @@ export default {
       if(this.chatClient) {
         this.destroyClient();
       }
-      const clientId = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
-      const authProvider = new StaticAuthProvider(clientId, token);
-      //const apiClient = new ApiClient({ authProvider });
-      const chatClient = new ChatClient(authProvider, { channels: ['robotfrogs3'] });
+      
+      const authProvider = new StaticAuthProvider(twitchClientId, token);
+      const apiClient = new ApiClient({ authProvider });
+      const cheermotes = await apiClient.kraken.bits.getCheermotes();
+      const chatClient = new ChatClient(authProvider, { channels: ['motherafdragons'] });
       await chatClient.connect();
       console.log("Connected to Twitch chat");
-      chatClient.onMessage((channel, user, message) => {
+      chatClient.onMessage((channel, user, message, msgObj) => {
         this.chatMessages = [
-          { user, message },
-          ...this.chatMessages.slice(0,5)
+          {
+            user,
+            message: msgObj.parseEmotesAndBits(cheermotes)
+              .map(m => {
+                if(m.type === 'text') {
+                  return {
+                    text: m.text
+                  };
+                }
+                else if(m.type === 'emote') {
+                  return {
+                    html: `<img src="https://static-cdn.jtvnw.net/emoticons/v1/${m.id}/1.0"></img>`
+                  };
+                }
+                else if(m.type === 'cheer') {
+                  return {
+                    html: `<img src="${m.displayInfo.url}"></img>`
+                  };
+                }
+                else {
+                  console.error(`Unknown message type, '${m.type}'`);
+                }
+              }),
+            color: msgObj.userInfo.color || '#FFF'
+          },
+          ...this.chatMessages.slice(0,10)
         ];
       });
       this.chatClient = chatClient;
@@ -66,6 +93,11 @@ export default {
         this.chatClient.quit();
         console.log("Disconnected from Twitch chat");
       }
+    }
+  },
+  beforeDestroy() {
+    if(this.chatClient) {
+      this.destroyClient();
     }
   }
 };
