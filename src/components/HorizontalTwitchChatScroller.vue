@@ -1,51 +1,47 @@
 <template>
-  <div class="hello">
-    
+  <div class="chat-messages">
+    <div
+      class="chat-message"
+      v-for="m in chatMessages"
+      :key="''+random()+m.user">
+      <span>{{m.user}}: </span>
+      <span>{{m.message}}</span>
+    </div>
   </div>
 </template>
 
 <script>
-import { ChatClient } from 'twitch-chat-client';
-//import { ApiClient } from 'twitch';
-import { StaticAuthProvider } from 'twitch-auth';
-
 export default {
-  name: "HelloWorld",
   props: {
-    token: String,
-    chatClient: undefined
+    chatMessages: Array
   },
-  watch: {
-    async token(value) {
-      if(!value) {
-        return;
-      }
-      const clientId = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
-      const authProvider = new StaticAuthProvider(clientId, value);
-      //const apiClient = new ApiClient({ authProvider });
-      const chatClient = new ChatClient(authProvider, { channels: ['robotfrogs3'] });
-      await chatClient.connect();
-      console.log("Connected");
-      chatClient.onMessage(console.log);
+  methods: {
+    random(){
+      return Math.random();
     }
   }
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+<style lang="scss">
+.chat-messages {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row-reverse;
+  position: absolute;
+  width: 100%;
+  right: 0;
+  bottom: 0;
+  padding: 2px 5px;
+  background-color: #444;
+
+  > * {
+    flex: 0 0 auto;
+  }
+
+  .chat-message {
+    margin-right: 15px;
+  }
 }
 </style>
