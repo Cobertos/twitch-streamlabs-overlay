@@ -1,5 +1,6 @@
 module.exports = {
   devServer: {
+    disableHostCheck: true, // for ngrok
     port: 42069
   },
   chainWebpack: config => {
