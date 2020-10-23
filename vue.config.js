@@ -1,4 +1,7 @@
 module.exports = {
+  devServer: {
+    port: 42069
+  },
   chainWebpack: config => {
     config.module
       .rule('mjs-support')

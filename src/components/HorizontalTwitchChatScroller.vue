@@ -9,21 +9,25 @@ import { ChatClient } from 'twitch-chat-client';
 //import { ApiClient } from 'twitch';
 import { StaticAuthProvider } from 'twitch-auth';
 
-const clientId = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
-const accessToken = '';
-const authProvider = new StaticAuthProvider(clientId, accessToken);
-//const apiClient = new ApiClient({ authProvider });
-const chatClient = new ChatClient(authProvider, { channels: ['robotfrogs3'] });
-
 export default {
   name: "HelloWorld",
   props: {
-    msg: String
+    token: String,
+    chatClient: undefined
   },
-  async mounted() {
-    await chatClient.connect();
-    console.log("Connected");
-    chatClient.onMessage(console.log);
+  watch: {
+    async token(value) {
+      if(!value) {
+        return;
+      }
+      const clientId = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
+      const authProvider = new StaticAuthProvider(clientId, value);
+      //const apiClient = new ApiClient({ authProvider });
+      const chatClient = new ChatClient(authProvider, { channels: ['robotfrogs3'] });
+      await chatClient.connect();
+      console.log("Connected");
+      chatClient.onMessage(console.log);
+    }
   }
 };
 </script>

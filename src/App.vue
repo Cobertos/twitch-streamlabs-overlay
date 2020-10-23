@@ -1,17 +1,36 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" width="25%">
-    <horizontal-twitch-chat-scroller />
+    <twitch-oauth-button
+      clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
+      :redirectURI="uri"
+      scope="chat:read chat:edit"
+      @access-token="token = $event"
+      />
+    <horizontal-twitch-chat-scroller
+      :token="token"/>
   </div>
 </template>
 
 <script>
-import HorizontalTwitchChatScroller from "./components/HorizontalTwitchChatScroller";
+import HorizontalTwitchChatScroller from "./components/HorizontalTwitchChatScroller.vue";
+import TwitchOauthButton from "./components/TwitchOAuthButton.vue";
 
 export default {
   name: "App",
+  data() {
+    return {
+      token: undefined
+    }
+  },
   components: {
-    HorizontalTwitchChatScroller
+    HorizontalTwitchChatScroller, TwitchOauthButton
+  },
+  computed: {
+    uri() {
+      let href = window.location.href;
+      href = href.replace(/\/$/, ''); // Remove trailing / if present
+      return href;
+    }
   }
 };
 </script>
