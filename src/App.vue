@@ -4,7 +4,7 @@
       v-if="!chatClient"
       clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
       :redirectURI="uri"
-      scope="chat:read chat:edit"
+      scope="chat:read chat:edit user_read"
       @access-token="createClient"
       />
     <div
@@ -53,7 +53,8 @@ export default {
       const authProvider = new StaticAuthProvider(twitchClientId, token);
       const apiClient = new ApiClient({ authProvider });
       const cheermotes = await apiClient.kraken.bits.getCheermotes();
-      const chatClient = new ChatClient(authProvider, { channels: ['pokimane'] });
+      const me = await apiClient.kraken.users.getMe();
+      const chatClient = new ChatClient(authProvider, { channels: [me.name] });
       await chatClient.connect();
       console.log("Connected to Twitch chat");
       chatClient.onMessage((channel, user, message, msgObj) => {
@@ -62,19 +63,22 @@ export default {
             id: ''+Math.random(),
             user,
             message: msgObj.parseEmotesAndBits(cheermotes)
-              .map(m => {
+              .map((m, id) => {
                 if(m.type === 'text') {
                   return {
+                    id,
                     text: m.text
                   };
                 }
                 else if(m.type === 'emote') {
                   return {
+                    id,
                     html: `<img src="https://static-cdn.jtvnw.net/emoticons/v1/${m.id}/1.0"></img>`
                   };
                 }
                 else if(m.type === 'cheer') {
                   return {
+                    id,
                     html: `<img src="${m.displayInfo.url}"></img>`
                   };
                 }

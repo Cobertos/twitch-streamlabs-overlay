@@ -14,20 +14,21 @@
         {{m.user}}:
       </span>
       <!-- Shitty hack for .a to get linter off my back -->
-      <span
+      <template
         class="chat-message"
         v-for="part in m.message"
-        :key="'1'+m.id+part.a"
       >
         <span
           v-if="part.text"
           v-text="part.text"
+          :key="'1'+m.id+part.id"
         />
         <span
           v-if="part.html"
           v-html="part.html"
+          :key="'1'+m.id+part.id"
         />
-      </span>
+      </template>
       <span
         v-if="idx !== chatMessagesReversed.length - 1"
         class="chat-separator"
