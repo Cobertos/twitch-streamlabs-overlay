@@ -1,7 +1,9 @@
+const fetch = require('node_fetch');
+
 module.exports = async (req, res) => {
   const clientID = "tKjGdvsJGyCIhN2jZ19bYgsClHs8UFgwIidstmFk";
   const clientSecret = process.env.STREAMLABS_CLIENT_SECRET;
-  const redirectURI = "https://twitch-streamlabs-overlay.vercel.app";
+  const redirectURI = encodeURIComponent("https://twitch-streamlabs-overlay.vercel.app");
   const code = req.query.code;
 
   // Take code from request
