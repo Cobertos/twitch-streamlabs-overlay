@@ -53,12 +53,13 @@ export default {
       const authProvider = new StaticAuthProvider(twitchClientId, token);
       const apiClient = new ApiClient({ authProvider });
       const cheermotes = await apiClient.kraken.bits.getCheermotes();
-      const chatClient = new ChatClient(authProvider, { channels: ['motherafdragons'] });
+      const chatClient = new ChatClient(authProvider, { channels: ['pokimane'] });
       await chatClient.connect();
       console.log("Connected to Twitch chat");
       chatClient.onMessage((channel, user, message, msgObj) => {
         this.chatMessages = [
           {
+            id: ''+Math.random(),
             user,
             message: msgObj.parseEmotesAndBits(cheermotes)
               .map(m => {

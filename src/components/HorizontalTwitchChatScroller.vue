@@ -1,12 +1,15 @@
 <template>
-  <div class="chat-messages">
+  <transition-group
+    class="chat-messages"
+    name="chat-message-items"
+    tag="div">
     <template
       v-for="(m, idx) in chatMessagesReversed"
     >
       <span
         class="chat-name"
         :style="{ color: m.color }"
-        :key="'1'+random()+m.user"
+        :key="'0'+m.id"
       >
         {{m.user}}:
       </span>
@@ -14,7 +17,7 @@
       <span
         class="chat-message"
         v-for="part in m.message"
-        :key="'22'+random()+part.a"
+        :key="'1'+m.id+part.a"
       >
         <span
           v-if="part.text"
@@ -28,11 +31,11 @@
       <span
         v-if="idx !== chatMessagesReversed.length - 1"
         class="chat-separator"
-        :key="'3'+random()+m.user">
+        :key="'2'+m.id">
         ⬩
       </span>
     </template>
-  </div>
+  </transition-group>
 </template>
 
 <script>
@@ -44,12 +47,7 @@ export default {
     chatMessagesReversed(){
       return this.chatMessages.slice().reverse();
     }
-  },
-  methods: {
-    random(){
-      return Math.random();
-    }
-  },
+  }
 };
 </script>
 
@@ -88,5 +86,9 @@ export default {
       margin: 0 3px;
     }
   }
+}
+
+.chat-message-items-enter-active, .chat-message-items-leave-active, .chat-message-items-move {
+  transition: transform 0.5s;
 }
 </style>
