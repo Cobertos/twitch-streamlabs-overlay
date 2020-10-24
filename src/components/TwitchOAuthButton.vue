@@ -53,7 +53,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .oauth-button {
   color: #FFF;
   background-color: #6441a5;

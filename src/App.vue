@@ -13,6 +13,12 @@
         Authed >:3!<br>
         Chat for channel <span style="color:#F0F">#{{chatChannelName || 'loading...'}}</span>
       </div>
+      <streamlabs-oauth-button
+        v-if="!streamlabsClient"
+        clientID="tKjGdvsJGyCIhN2jZ19bYgsClHs8UFgwIidstmFk"
+        redirectURI="https://twitch-streamlabs-overlay.vercel.app"
+        scope="socket.token"
+      />
     </div>
     <horizontal-twitch-chat-scroller
       :chatMessages="chatMessages"/>
@@ -26,6 +32,7 @@ import { StaticAuthProvider } from 'twitch-auth';
 
 import HorizontalTwitchChatScroller from "./components/HorizontalTwitchChatScroller.vue";
 import TwitchOauthButton from "./components/TwitchOAuthButton.vue";
+import StreamlabsOauthButton from "./components/StreamlabsOAuthButton.vue";
 
 const twitchClientId = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
 
@@ -35,15 +42,16 @@ export default {
     return {
       chatChannelName: '',
       chatClient: undefined,
-      chatMessages: []
+      chatMessages: [],
+      streamlabsClient: undefined
     }
   },
   components: {
-    HorizontalTwitchChatScroller, TwitchOauthButton
+    HorizontalTwitchChatScroller, TwitchOauthButton, StreamlabsOauthButton
   },
   computed: {
     uri() {
-      let href = window.location.protocol + '//' + window.location.host;
+      let href = window.location.origin;
       href = href.replace(/\/$/, ''); // Remove trailing / if present
       return href;
     }
