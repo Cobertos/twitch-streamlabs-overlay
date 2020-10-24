@@ -32,8 +32,7 @@ export default {
   },
   methods: {
     async tryCode() {
-      if(window.location.href.indexOf('?') !== -1 &&
-        this.clientSecret) {
+      if(window.location.href.indexOf('?') !== -1) {
         let params;
         try {
           params = window.location.href
