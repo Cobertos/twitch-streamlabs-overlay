@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
   }
 
   // CORS, if coming from an origin we accept (localhost or production app)
-  const match = req.headers.Origin
+  const match = req.headers.Origin && req.headers.Origin
     .match(/^https?:\/\/(localhost:42069|twitch-streamlabs-overlay\.vercel\.app)\/?$/);
   if(match) {
     res.setHeader('Access-Control-Allow-Origin', req.headers.Origin);
