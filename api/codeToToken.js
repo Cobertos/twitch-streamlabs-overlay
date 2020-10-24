@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
-    body: `grant_type=authorization_code&client_id=${clientID}&client_secret=${clientSecret}&redirect_url=${redirectURI}&code=${code}`
+    body: `grant_type=authorization_code&client_id=${clientID}&client_secret=${clientSecret}&redirect_uri=${redirectURI}&code=${code}`
   });
   const json = await resp.json();
   if(!json.access_code) {
