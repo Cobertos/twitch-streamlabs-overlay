@@ -7,7 +7,9 @@ module.exports = async (req, res) => {
   const code = req.query.code;
 
   // Take code from request
-  const resp = await fetch(`https://streamlabs.com/api/v1.0/token?grant_type=authorization_code&client_id=${clientID}&client_secret=${clientSecret}&redirect_url=${redirectURI}&code=${code}`);
+  const resp = await fetch(`https://streamlabs.com/api/v1.0/token?grant_type=authorization_code&client_id=${clientID}&client_secret=${clientSecret}&redirect_url=${redirectURI}&code=${code}`, {
+    method: 'POST'
+  });
   const json = await resp.json();
 
   res.json({
