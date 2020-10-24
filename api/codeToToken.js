@@ -1,4 +1,4 @@
-const fetch = require('node_fetch');
+const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
   const clientID = "tKjGdvsJGyCIhN2jZ19bYgsClHs8UFgwIidstmFk";
