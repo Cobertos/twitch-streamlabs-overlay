@@ -20,7 +20,13 @@ module.exports = async (req, res) => {
     throw new Error('No access_code was obtained');
   }
 
+  // CORS, if coming from an origin we accept (localhost or production app)
+  const match = req.headers.Origin
+    .match(/^https?:\/\/(localhost:42069|twitch-streamlabs-overlay\.vercel\.app)\/?$/);
+  if(match) {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.Origin);
+  }
   res.json({
-    access_code: json.access_token,
+    access_token: json.access_token,
   });
 }
