@@ -11,6 +11,7 @@ module.exports = async (req, res) => {
     method: 'POST'
   });
   const json = await resp.json();
+  console.log(json);
 
   res.json({
     access_code: json.access_code,
