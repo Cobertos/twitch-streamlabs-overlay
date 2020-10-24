@@ -15,12 +15,12 @@ module.exports = async (req, res) => {
     body: `grant_type=authorization_code&client_id=${clientID}&client_secret=${clientSecret}&redirect_uri=${redirectURI}&code=${code}`
   });
   const json = await resp.json();
-  if(!json.access_code) {
+  if(!json.access_token) {
     console.error(json);
     throw new Error('No access_code was obtained');
   }
 
   res.json({
-    access_code: json.access_code,
+    access_code: json.access_token,
   });
 }
