@@ -39,7 +39,7 @@ export default {
   },
   computed: {
     uri() {
-      let href = window.location.href;
+      let href = window.location.protocol + '//' + window.location.host;
       href = href.replace(/\/$/, ''); // Remove trailing / if present
       return href;
     }
