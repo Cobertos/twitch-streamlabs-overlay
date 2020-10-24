@@ -1,15 +1,18 @@
 <template>
   <div id="app">
-    <twitch-oauth-button
-      v-if="!chatClient"
-      clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
-      :redirectURI="uri"
-      scope="chat:read chat:edit user_read"
-      @access-token="createClient"
-      />
-    <div
-      v-else>
-      Authed!
+    <div class="auth-container">
+      <twitch-oauth-button
+        v-if="!chatClient"
+        clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
+        :redirectURI="uri"
+        scope="chat:read chat:edit user_read"
+        @access-token="createClient"
+        />
+      <div
+        v-else>
+        Authed >:3!<br>
+        Chat for channel <span style="color:#F0F">#{{chatChannelName || 'loading...'}}</span>
+      </div>
     </div>
     <horizontal-twitch-chat-scroller
       :chatMessages="chatMessages"/>
@@ -30,6 +33,7 @@ export default {
   name: "App",
   data() {
     return {
+      chatChannelName: '',
       chatClient: undefined,
       chatMessages: []
     }
@@ -54,6 +58,7 @@ export default {
       const apiClient = new ApiClient({ authProvider });
       const cheermotes = await apiClient.kraken.bits.getCheermotes();
       const me = await apiClient.kraken.users.getMe();
+      this.chatChannelName = me.name;
       const chatClient = new ChatClient(authProvider, { channels: [me.name] });
       await chatClient.connect();
       console.log("Connected to Twitch chat");
@@ -109,11 +114,18 @@ export default {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500&display=swap');
+
 body, html {
   background-color: #000;
   color: #FFF;
   padding: 0;
   margin: 0;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+.auth-container {
+  margin-top: 10px;
+  text-align: center;
 }
 #app {
   display: flex;
