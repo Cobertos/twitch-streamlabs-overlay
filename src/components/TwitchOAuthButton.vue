@@ -29,26 +29,41 @@ export default {
       return `https://id.twitch.tv/oauth2/authorize?client_id=${this.clientID}&redirect_uri=${redirectURI}&response_type=token&scope=${scopeEncoded}`;
     }
   },
+  methods: {
+    tryHash(){
+      if(window.location.hash) {
+        let params;
+        try {
+          params = window.location.hash
+            .slice(1) // Remove leading #
+            .split('&')
+            .map(s => s.split('='))
+            .map(([k,v]) => ({
+              [k]: window.decodeURIComponent(v)
+            }))
+            .reduce((acc, itm) => ({ ...acc, ...itm }), {});
+          if(!params.access_token) {
+            throw new Error('No access_token in params');
+          }
+        }
+        catch(e) {
+          console.error('Couldnt parse OAuth response');
+          console.error(e);
+          return;
+        }
+        this.$emit('access-token', params['access_token']);
+      }
+    }
+  },
   created() {
     if(window.location.hash) {
-      let params;
-      try {
-        params = window.location.hash
-          .slice(1) // Remove leading #
-          .split('&')
-          .map(s => s.split('='))
-          .map(([k,v]) => ({
-            [k]: window.decodeURIComponent(v)
-          }))
-          .reduce((acc, itm) => ({ ...acc, ...itm }), {});
-      }
-      catch(e) {
-        console.error('Couldnt parse OAuth response');
-        console.error(e);
-        return;
-      }
-      this.$emit('access-token', params['access_token']);
+      this.tryHash();
     }
+    this.$options.hashListener = this.tryHash.bind(this);
+    window.addEventListener("hashchange", this.$options.hashListener);
+  },
+  beforeDestroy() {
+    window.removeEventListener("hashchange", this.$options.hashListener);
   }
 }
 </script>
