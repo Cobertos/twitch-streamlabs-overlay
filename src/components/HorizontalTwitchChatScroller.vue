@@ -1,10 +1,7 @@
 <template>
-  <transition-group
-    class="chat-messages"
-    name="chat-message-items"
-    tag="div">
+  <horizontal-scroller>
     <template
-      v-for="(m, idx) in chatMessagesReversed"
+      v-for="(m, idx) in messages.slice().reverse()"
     >
       <span
         class="chat-name"
@@ -30,66 +27,132 @@
         />
       </template>
       <span
-        v-if="idx !== chatMessagesReversed.length - 1"
+        v-if="idx !== messages.length - 1"
         class="chat-separator"
         :key="'2'+m.id">
         ⬩
       </span>
     </template>
-  </transition-group>
+  </horizontal-scroller>
 </template>
 
 <script>
+import { ChatClient } from 'twitch-chat-client';
+import { ApiClient } from 'twitch';
+import { StaticAuthProvider } from 'twitch-auth';
+
+import HorizontalScroller from './HorizontalScroller.vue';
 export default {
+  components: { HorizontalScroller },
   props: {
-    chatMessages: Array
+    accessToken: {
+      type: String,
+      required: true
+    },
+    clientID: {
+      type: String,
+      required: true
+    },
+    channel: {
+      type: String,
+      required: true
+    }
   },
-  computed: {
-    chatMessagesReversed(){
-      return this.chatMessages.slice().reverse();
+  data() {
+    return {
+      client: undefined,
+      messages: []
+    }
+  },
+  watch: {
+    accessToken(token){
+      this.createClient(token);
+    }
+  },
+  methods: {
+    async createClient(token) {
+      if(this.client) {
+        this.destroyClient();
+      }
+      const authProvider = new StaticAuthProvider(this.clientID, token);
+      const apiClient = new ApiClient({ authProvider });
+      // Get cheer emotes so we can display bits
+      const cheermotes = await apiClient.kraken.bits.getCheermotes();
+
+      const chatClient = new ChatClient(authProvider, { channels: [this.channel] });
+      chatClient.onMessage((channel, user, message, msgObj) => {
+        this.messages = [
+          {
+            id: ''+Math.random(),
+            user,
+            message: msgObj.parseEmotesAndBits(cheermotes)
+              .map((m, id) => {
+                if(m.type === 'text') {
+                  return {
+                    id,
+                    text: m.text
+                  };
+                }
+                else if(m.type === 'emote') {
+                  return {
+                    id,
+                    html: `<img src="https://static-cdn.jtvnw.net/emoticons/v1/${m.id}/1.0"></img>`
+                  };
+                }
+                else if(m.type === 'cheer') {
+                  return {
+                    id,
+                    html: `<img src="${m.displayInfo.url}"></img>`
+                  };
+                }
+                else {
+                  console.error(`Unknown message type, '${m.type}'`);
+                }
+              }),
+            color: msgObj.userInfo.color || '#FFF'
+          },
+          ...this.messages.slice(0,10)
+        ];
+      });
+      await chatClient.connect();
+      console.log("Connected to Twitch chat");
+      this.client = chatClient;
+    },
+    destroyClient() {
+      if(this.client) {
+        this.client.quit();
+        this.client = undefined;
+        console.log("Disconnected from Twitch chat");
+      }
+    }
+  },
+  created() {
+    if(this.accessToken) {
+      this.createClient(this.accessToken);
+    }
+  },
+  beforeDestroy() {
+    if(this.client) {
+      this.destroyClient();
     }
   }
 };
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500&display=swap');
-
-.chat-messages {
+.chat-name {
+  margin-right: 10px;
+  font-weight: 500;
+}
+.chat-separator {
+  margin: 0 15px;
+}
+.chat-message {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-direction: row;
-  position: absolute;
-  width: 100%;
-  right: 0;
-  bottom: 0;
-  padding: 2px 5px;
-  font-family: 'Roboto', Arial, sans-serif;
-  font-weight: 300;
 
-  > * {
-    flex: 0 0 auto;
+  img {
+    margin: 0 3px;
   }
-
-  .chat-name {
-    margin-right: 10px;
-    font-weight: 500;
-  }
-  .chat-separator {
-    margin: 0 15px;
-  }
-  .chat-message {
-    display: flex;
-    align-items: center;
-
-    img {
-      margin: 0 3px;
-    }
-  }
-}
-
-.chat-message-items-enter-active, .chat-message-items-leave-active, .chat-message-items-move {
-  transition: transform 0.5s;
 }
 </style>

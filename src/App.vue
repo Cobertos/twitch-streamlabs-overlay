@@ -2,126 +2,87 @@
   <div id="app">
     <div class="auth-container">
       <twitch-oauth-button
-        v-if="!chatClient"
+        v-if="!twitchAccessToken"
         clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
         :redirectURI="uri"
         scope="chat:read chat:edit user_read"
-        @access-token="createClient"
+        @access-token="setTwitchAccessToken"
         />
       <div
         v-else>
-        Authed >:3!<br>
-        Chat for channel <span style="color:#F0F">#{{chatChannelName || 'loading...'}}</span>
+        Twitch Authed >:3!<br>
+        Chat for channel <span style="color:#F0F">#{{twitchChatChannelName || 'loading...'}}</span>
       </div>
       <streamlabs-oauth-button
-        v-if="!streamlabsClient"
+        v-if="!streamlabsAccessToken"
         clientID="tKjGdvsJGyCIhN2jZ19bYgsClHs8UFgwIidstmFk"
         redirectURI="https://twitch-streamlabs-overlay.vercel.app"
         scope="socket.token"
+        @access-token="streamlabsAccessToken = $event"
       />
+      <div
+        v-else>
+        Streamlabs Authed :O!
+      </div>
     </div>
-    <horizontal-twitch-chat-scroller
-      :chatMessages="chatMessages"/>
+    <div class="scroller-container">
+      <horizontal-streamlabs-scroller
+        v-if="streamlabsAccessToken"
+        :accessToken="streamlabsAccessToken"
+        />
+      <horizontal-twitch-chat-scroller
+        v-if="twitchAccessToken && twitchChatChannelName"
+        clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
+        :accessToken="twitchAccessToken"
+        :channel="twitchChatChannelName"/>
+    </div>
   </div>
 </template>
 
 <script>
-import { ChatClient } from 'twitch-chat-client';
 import { ApiClient } from 'twitch';
 import { StaticAuthProvider } from 'twitch-auth';
 
 import HorizontalTwitchChatScroller from "./components/HorizontalTwitchChatScroller.vue";
+import HorizontalStreamlabsScroller from "./components/HorizontalStreamlabsScroller.vue";
 import TwitchOauthButton from "./components/TwitchOAuthButton.vue";
 import StreamlabsOauthButton from "./components/StreamlabsOAuthButton.vue";
 
-const twitchClientId = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
+const twitchClientID = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
 
 export default {
   name: "App",
   data() {
     return {
-      chatChannelName: '',
-      chatClient: undefined,
-      chatMessages: [],
-      streamlabsClient: undefined
+      twitchAccessToken: undefined,
+      twitchChatChannelName: '',
+      streamlabsAccessToken: undefined
     }
   },
   components: {
-    HorizontalTwitchChatScroller, TwitchOauthButton, StreamlabsOauthButton
+    HorizontalTwitchChatScroller, HorizontalStreamlabsScroller,
+    TwitchOauthButton, StreamlabsOauthButton
   },
   computed: {
     uri() {
       let href = window.location.origin;
       href = href.replace(/\/$/, ''); // Remove trailing / if present
       return href;
-    }
-  },
-  methods: {
-    async createClient(token) {
-      if(this.chatClient) {
-        this.destroyClient();
-      }
-      
-      const authProvider = new StaticAuthProvider(twitchClientId, token);
-      const apiClient = new ApiClient({ authProvider });
-      const cheermotes = await apiClient.kraken.bits.getCheermotes();
-      const me = await apiClient.kraken.users.getMe();
-      this.chatChannelName = me.name;
-      const chatClient = new ChatClient(authProvider, { channels: [me.name] });
-      await chatClient.connect();
-      console.log("Connected to Twitch chat");
-      chatClient.onMessage((channel, user, message, msgObj) => {
-        this.chatMessages = [
-          {
-            id: ''+Math.random(),
-            user,
-            message: msgObj.parseEmotesAndBits(cheermotes)
-              .map((m, id) => {
-                if(m.type === 'text') {
-                  return {
-                    id,
-                    text: m.text
-                  };
-                }
-                else if(m.type === 'emote') {
-                  return {
-                    id,
-                    html: `<img src="https://static-cdn.jtvnw.net/emoticons/v1/${m.id}/1.0"></img>`
-                  };
-                }
-                else if(m.type === 'cheer') {
-                  return {
-                    id,
-                    html: `<img src="${m.displayInfo.url}"></img>`
-                  };
-                }
-                else {
-                  console.error(`Unknown message type, '${m.type}'`);
-                }
-              }),
-            color: msgObj.userInfo.color || '#FFF'
-          },
-          ...this.chatMessages.slice(0,10)
-        ];
-      });
-      this.chatClient = chatClient;
     },
-    destroyClient() {
-      if(this.chatClient) {
-        this.chatClient.quit();
-        console.log("Disconnected from Twitch chat");
-      }
-    }
   },
-  beforeDestroy() {
-    if(this.chatClient) {
-      this.destroyClient();
+  methods:{
+    async setTwitchAccessToken(token) {
+      this.twitchAccessToken = token;
+      const authProvider = new StaticAuthProvider(twitchClientID, this.twitchAccessToken);
+      const apiClient = new ApiClient({ authProvider });
+      const me = await apiClient.kraken.users.getMe();
+      this.twitchChatChannelName = me.name;
     }
   }
 };
 </script>
 
-<style>
+<style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500&display=swap');
 
 body, html {
@@ -130,14 +91,32 @@ body, html {
   padding: 0;
   margin: 0;
   font-family: 'Roboto', Arial, sans-serif;
+  width: 100%;
+  height: 100%;
 }
 .auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
   margin-top: 10px;
   text-align: center;
+
+  > *:nth-child(n+2) {
+    margin-left: 10px;
+  }
+}
+.scroller-container {
+  width: 100%;
 }
 #app {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+}
+* {
+  box-sizing: border-box;
 }
 </style>
