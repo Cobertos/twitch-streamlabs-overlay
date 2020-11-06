@@ -1,30 +1,36 @@
 <template>
   <div id="app">
-    <div class="auth-container">
-      <twitch-oauth-button
-        v-if="!twitchAccessToken"
-        clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
-        :redirectURI="uri"
-        scope="chat:read chat:edit user_read"
-        @access-token="setTwitchAccessToken"
+    <div>
+      <div class="auth-container">
+        <twitch-oauth-button
+          v-if="!twitchAccessToken"
+          clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
+          :redirectURI="uri"
+          scope="chat:read chat:edit user_read"
+          @access-token="setTwitchAccessToken"
+          />
+        <div
+          v-else>
+          Twitch Authed >:3!<br>
+          Chat for channel <span style="color:#F0F">#{{twitchChatChannelName || 'loading...'}}</span>
+        </div>
+        <streamlabs-oauth-button
+          v-if="!streamlabsAccessToken"
+          clientID="tKjGdvsJGyCIhN2jZ19bYgsClHs8UFgwIidstmFk"
+          redirectURI="https://twitch-streamlabs-overlay.vercel.app"
+          scope="socket.token"
+          @access-token="streamlabsAccessToken = $event"
         />
-      <div
-        v-else>
-        Twitch Authed >:3!<br>
-        Chat for channel <span style="color:#F0F">#{{twitchChatChannelName || 'loading...'}}</span>
+        <div
+          v-else>
+          Streamlabs Authed :O!
+        </div>
       </div>
-      <streamlabs-oauth-button
-        v-if="!streamlabsAccessToken"
-        clientID="tKjGdvsJGyCIhN2jZ19bYgsClHs8UFgwIidstmFk"
-        redirectURI="https://twitch-streamlabs-overlay.vercel.app"
-        scope="socket.token"
-        @access-token="streamlabsAccessToken = $event"
-      />
-      <div
-        v-else>
-        Streamlabs Authed :O!
+      <div style="margin-top:20px">
+        Blocked users: <span style="color:#0FF">{{twitchChatBlockedNames.join(',')}}</span>
       </div>
     </div>
+
     <div class="scroller-container">
       <horizontal-streamlabs-scroller
         v-if="streamlabsAccessToken"
@@ -34,7 +40,8 @@
         v-if="twitchAccessToken && twitchChatChannelName"
         clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
         :accessToken="twitchAccessToken"
-        :channel="twitchChatChannelName"/>
+        :channel="twitchChatChannelName"
+        :blocked="twitchChatBlockedNames"/>
     </div>
   </div>
 </template>
@@ -56,7 +63,8 @@ export default {
     return {
       twitchAccessToken: undefined,
       twitchChatChannelName: '',
-      streamlabsAccessToken: undefined
+      twitchChatBlockedNames: [],
+      streamlabsAccessToken: undefined,
     }
   },
   components: {
@@ -75,8 +83,25 @@ export default {
       this.twitchAccessToken = token;
       const authProvider = new StaticAuthProvider(twitchClientID, this.twitchAccessToken);
       const apiClient = new ApiClient({ authProvider });
-      const me = await apiClient.kraken.users.getMe();
-      this.twitchChatChannelName = me.name;
+      if(!this.twitchChatChannelName) {
+        const me = await apiClient.kraken.users.getMe();
+        this.twitchChatChannelName = me.name;
+      }
+    }
+  },
+  created() {
+    const query = window.location.search.slice(1)
+      .split('&')
+      .map(s => s.split('='))
+      .map(([k,v]) => ({
+        [k]: window.decodeURIComponent(v)
+      }))
+      .reduce((acc, itm) => ({ ...acc, ...itm }), {});
+    if(query.channel) {
+      this.twitchChatChannelName = query.channel;
+    }
+    if(query.blocked) {
+      this.twitchChatBlockedNames = query.blocked.split(',');
     }
   }
 };

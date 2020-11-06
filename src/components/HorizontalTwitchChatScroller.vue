@@ -56,6 +56,10 @@ export default {
     channel: {
       type: String,
       required: true
+    },
+    blocked: {
+      type: Array,
+      required: true
     }
   },
   data() {
@@ -81,6 +85,10 @@ export default {
 
       const chatClient = new ChatClient(authProvider, { channels: [this.channel] });
       chatClient.onMessage((channel, user, message, msgObj) => {
+        if(this.blocked.includes(user)) {
+          return; // Blocked user
+        }
+
         this.messages = [
           {
             id: ''+Math.random(),
@@ -114,6 +122,10 @@ export default {
           ...this.messages.slice(0,10)
         ];
       });
+      // chatClient.onMessageRemove((channel, messageId, msg) => {
+      //   this.messages = this.messages
+      //     .filter(m => m
+      // });
       await chatClient.connect();
       console.log("Connected to Twitch chat");
       this.client = chatClient;
