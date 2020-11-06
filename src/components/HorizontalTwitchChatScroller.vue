@@ -88,10 +88,11 @@ export default {
         if(this.blocked.includes(user)) {
           return; // Blocked user
         }
+        console.log(channel, user, message, msgObj);
 
         this.messages = [
           {
-            id: ''+Math.random(),
+            id: msgObj._tags.get('id'),
             user,
             message: msgObj.parseEmotesAndBits(cheermotes)
               .map((m, id) => {
@@ -119,13 +120,27 @@ export default {
               }),
             color: msgObj.userInfo.color || '#FFF'
           },
-          ...this.messages.slice(0,10)
+          ...this.messages.slice(0,20)
         ];
       });
-      // chatClient.onMessageRemove((channel, messageId, msg) => {
-      //   this.messages = this.messages
-      //     .filter(m => m
-      // });
+      // This only gets called when it doesn't happen from a ban
+      chatClient.onChatClear((/*channel*/) => {
+        this.messages = [];
+      });
+      // This gets called when a chat clear has a user and duration
+      const removeUserMessages = (channel, user) => {
+        console.log(`Remove user messages for ${user}`);
+        this.messages = this.messages
+          .filter(m => m.user !== user);
+      };
+      chatClient.onBan(removeUserMessages);
+      chatClient.onTimeout(removeUserMessages);
+      // I've never actually seen this called so idk if this will work...
+      chatClient.onMessageRemove((channel, messageId/*, msg*/) => {
+        // Remove any deleted messages
+        this.messages = this.messages
+          .filter(m => m.id !== messageId);
+      });
       await chatClient.connect();
       console.log("Connected to Twitch chat");
       this.client = chatClient;
