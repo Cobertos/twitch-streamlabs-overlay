@@ -1,9 +1,29 @@
 <template>
-  <a
-    class="oauth-button"
-    :href="oauthURL">
-    Streamlabs OAuth
-  </a>
+  <div
+    class="oauth-button-container"
+  >
+    <a
+      class="oauth-button"
+      :href="oauthURL">
+      Auth wth Streamlabs
+    </a>
+    <div>
+      <input
+        type="text"
+        v-model="lastAccessToken"
+        placeholder="or paste your token here..."
+      >
+      <button
+        v-text="'Submit'"
+        @click="$emit('access-token', lastAccessToken)"
+      />
+    </div>
+    <p
+      class="under-text"
+    >
+      Do not share this, it's secret!
+    </p>
+  </div>
 </template>
 
 <script>
@@ -21,6 +41,11 @@ export default {
       type: String,
       required: true
     }
+  },
+  data() {
+    return {
+      lastAccessToken: ''
+    };
   },
   computed: {
     oauthURL() {
@@ -53,7 +78,8 @@ export default {
         const code = params['code'];
         const resp = await fetch(`https://twitch-streamlabs-overlay.vercel.app/api/codeToToken?code=${code}`);
         const json = await resp.json();
-        this.$emit('access-token', json.access_token);
+        this.lastAccessToken = json.access_token;
+        this.$emit('access-token', this.lastAccessToken);
       }
     }
   },
@@ -64,20 +90,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.oauth-button {
-  color: #FFF;
-  background-color: #32C3A2;
-  border-radius: 5px;
-  text-decoration: none;
-  padding: 4px 10px;
+.oauth-button-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 
-  &:hover {
-    background-color: lighten(#32C3A2,10%);
+  .oauth-button {
+    color: #FFF;
+    background-color: #32C3A2;
+    border-radius: 5px;
+    text-decoration: none;
+    padding: 4px 10px;
+    margin-bottom: 10px;
+
+    &:hover {
+      background-color: lighten(#32C3A2,10%);
+    }
+
+    &.disabled {
+      background-color: #72968E;
+      pointer-events: none;
+    }
   }
 
-  &.disabled {
-    background-color: #72968E;
-    pointer-events: none;
+  .under-text {
+    font-size: 10px;
   }
 }
 </style>

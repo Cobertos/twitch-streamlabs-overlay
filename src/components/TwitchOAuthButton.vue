@@ -1,9 +1,29 @@
 <template>
-  <a
-    class="oauth-button"
-    :href="oauthURL">
-    Twitch OAuth
-  </a>
+  <div
+   class="oauth-button-container"
+  >
+    <a
+      class="oauth-button"
+      :href="oauthURL">
+      Auth wth Twitch
+    </a>
+    <div>
+      <input
+        type="text"
+        v-model="lastAccessToken"
+        placeholder="or paste your token here..."
+      >
+      <button
+        v-text="'Submit'"
+        @click="$emit('access-token', lastAccessToken)"
+      />
+    </div>
+    <p
+      class="under-text"
+    >
+      Do not share this, it's secret!
+    </p>
+  </div>
 </template>
 
 <script>
@@ -21,6 +41,11 @@ export default {
       type: String,
       required: true
     }
+  },
+  data() {
+    return {
+      lastAccessToken: ''
+    };
   },
   computed: {
     oauthURL() {
@@ -51,6 +76,7 @@ export default {
           console.error(e);
           return;
         }
+        this.lastAccessToken = params['access_token'];
         this.$emit('access-token', params['access_token']);
       }
     }
@@ -69,15 +95,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.oauth-button {
-  color: #FFF;
-  background-color: #6441a5;
-  border-radius: 5px;
-  text-decoration: none;
-  padding: 4px 10px;
+.oauth-button-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 
-  &:hover {
-    background-color: lighten(#6441a5,10%);
+  .oauth-button {
+    color: #FFF;
+    background-color: #6441a5;
+    border-radius: 5px;
+    text-decoration: none;
+    padding: 4px 10px;
+    margin-bottom: 10px;
+
+    &:hover {
+      background-color: lighten(#6441a5,10%);
+    }
+  }
+
+  .under-text {
+    font-size: 10px;
   }
 }
 </style>
