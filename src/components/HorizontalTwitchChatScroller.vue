@@ -1,39 +1,41 @@
 <template>
-  <horizontal-scroller>
-    <template
-      v-for="(m, idx) in messages.slice().reverse()"
-    >
-      <span
-        class="chat-name"
-        :style="{ color: m.color }"
-        :key="'0'+m.id"
-      >
-        {{m.user}}:
-      </span>
-      <!-- Shitty hack for .a to get linter off my back -->
+  <div class="twitch-chat-container">
+    <horizontal-scroller>
       <template
-        class="chat-message"
-        v-for="part in m.message"
+        v-for="(m, idx) in messages.slice().reverse()"
       >
         <span
-          v-if="part.text"
-          v-text="part.text"
-          :key="'1'+m.id+part.id"
-        />
+          class="chat-name"
+          :style="{ color: m.color }"
+          :key="'0'+m.id"
+        >
+          {{m.user}}:
+        </span>
+        <!-- Shitty hack for .a to get linter off my back -->
+        <template
+          class="chat-message"
+          v-for="part in m.message"
+        >
+          <span
+            v-if="part.text"
+            v-text="part.text"
+            :key="'1'+m.id+part.id"
+          />
+          <span
+            v-if="part.html"
+            v-html="part.html"
+            :key="'1'+m.id+part.id"
+          />
+        </template>
         <span
-          v-if="part.html"
-          v-html="part.html"
-          :key="'1'+m.id+part.id"
-        />
+          v-if="idx !== messages.length - 1"
+          class="chat-separator"
+          :key="'2'+m.id">
+          ⬩
+        </span>
       </template>
-      <span
-        v-if="idx !== messages.length - 1"
-        class="chat-separator"
-        :key="'2'+m.id">
-        ⬩
-      </span>
-    </template>
-  </horizontal-scroller>
+    </horizontal-scroller>
+  </div>
 </template>
 
 <script>
@@ -75,7 +77,7 @@ export default {
   },
   methods: {
     async createClient(token) {
-      if(this.client) {
+      if(this.$options.client) {
         this.destroyClient();
       }
       const authProvider = new StaticAuthProvider(this.clientID, token);
@@ -83,7 +85,7 @@ export default {
       // Get cheer emotes so we can display bits
       const cheermotes = await apiClient.bits.getCheermotes();
 
-      const chatClient = new ChatClient(authProvider, { channels: [this.channel] });
+      const chatClient = new ChatClient({ authProvider, channels: [this.channel] });
       chatClient.onMessage((channel, user, message, msgObj) => {
         if(this.blocked.includes(user)) {
           return; // Blocked user
@@ -143,12 +145,13 @@ export default {
       });
       await chatClient.connect();
       console.log("Connected to Twitch chat");
-      this.client = chatClient;
+      this.$options.client = chatClient;
+      console.log("ChatClient: ", chatClient);
     },
     destroyClient() {
-      if(this.client) {
-        this.client.quit();
-        this.client = undefined;
+      if(this.$options.client) {
+        this.$options.client.quit();
+        this.$options.client = undefined;
         console.log("Disconnected from Twitch chat");
       }
     }
@@ -159,7 +162,7 @@ export default {
     }
   },
   beforeDestroy() {
-    if(this.client) {
+    if(this.$options.client) {
       this.destroyClient();
     }
   }
@@ -167,6 +170,11 @@ export default {
 </script>
 
 <style lang="scss">
+.twitch-chat-container {
+  min-height: 40px;
+  display: flex;
+}
+
 .chat-name {
   margin-right: 10px;
   font-weight: 500;

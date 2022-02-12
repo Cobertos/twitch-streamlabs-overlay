@@ -20,7 +20,7 @@
           Twitch Authed >:3!<br>
           Chat for channel <span style="color:#F0F">#{{twitchChatChannelName || 'loading...'}}</span>
         </div>
-        <streamlabs-oauth-button
+        <!--streamlabs-oauth-button
           v-if="!streamlabsAccessToken"
           clientID="tKjGdvsJGyCIhN2jZ19bYgsClHs8UFgwIidstmFk"
           redirectURI="https://twitch-streamlabs-overlay.vercel.app"
@@ -30,7 +30,7 @@
         <div
           v-else>
           Streamlabs Authed :O!
-        </div>
+        </div-->
       </div>
       <div style="margin-top:20px">
         Blocked users: <span style="color:#0FF">{{twitchChatBlockedNames.join(',')}}</span>
@@ -38,10 +38,10 @@
     </div>
 
     <div class="scroller-container">
-      <horizontal-streamlabs-scroller
+      <!--horizontal-streamlabs-scroller
         v-if="streamlabsAccessToken"
         :accessToken="streamlabsAccessToken"
-        />
+        /-->
       <horizontal-twitch-chat-scroller
         v-if="twitchAccessToken && twitchChatChannelName"
         clientID="e7g44jusrmcfqyl59kzxe2j4c7ud9g"
@@ -57,9 +57,9 @@ import { ApiClient } from '@twurple/api';
 import { StaticAuthProvider } from '@twurple/auth';
 
 import HorizontalTwitchChatScroller from "./components/HorizontalTwitchChatScroller.vue";
-import HorizontalStreamlabsScroller from "./components/HorizontalStreamlabsScroller.vue";
+//import HorizontalStreamlabsScroller from "./components/HorizontalStreamlabsScroller.vue";
 import TwitchOauthButton from "./components/TwitchOAuthButton.vue";
-import StreamlabsOauthButton from "./components/StreamlabsOAuthButton.vue";
+//import StreamlabsOauthButton from "./components/StreamlabsOAuthButton.vue";
 
 const twitchClientID = 'e7g44jusrmcfqyl59kzxe2j4c7ud9g';
 
@@ -74,8 +74,8 @@ export default {
     }
   },
   components: {
-    HorizontalTwitchChatScroller, HorizontalStreamlabsScroller,
-    TwitchOauthButton, StreamlabsOauthButton
+    HorizontalTwitchChatScroller, /*HorizontalStreamlabsScroller,*/
+    TwitchOauthButton, /*StreamlabsOauthButton*/
   },
   computed: {
     uri() {
