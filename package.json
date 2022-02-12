@@ -12,7 +12,7 @@
     "@twurple/auth": "^5.0.17",
     "@twurple/chat": "^5.0.17",
     "core-js": "^3.6.5",
-    "node-fetch": "^3.2.0",
+    "node-fetch": "^2.6.7",
     "sass": "^1.49.7",
     "sass-loader": "^10.2.1",
     "streamlabs-ws-client": "^1.0.0",
