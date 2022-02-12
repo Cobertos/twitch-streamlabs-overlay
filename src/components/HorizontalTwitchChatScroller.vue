@@ -37,9 +37,9 @@
 </template>
 
 <script>
-import { ChatClient } from 'twitch-chat-client';
-import { ApiClient } from 'twitch';
-import { StaticAuthProvider } from 'twitch-auth';
+import { ChatClient } from '@twurple/chat';
+import { ApiClient } from '@twurple/api';
+import { StaticAuthProvider } from '@twurple/auth';
 
 import HorizontalScroller from './HorizontalScroller.vue';
 export default {
@@ -81,7 +81,7 @@ export default {
       const authProvider = new StaticAuthProvider(this.clientID, token);
       const apiClient = new ApiClient({ authProvider });
       // Get cheer emotes so we can display bits
-      const cheermotes = await apiClient.kraken.bits.getCheermotes();
+      const cheermotes = await apiClient.bits.getCheermotes();
 
       const chatClient = new ChatClient(authProvider, { channels: [this.channel] });
       chatClient.onMessage((channel, user, message, msgObj) => {

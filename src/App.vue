@@ -1,6 +1,12 @@
 <template>
   <div id="app">
     <div>
+      <div>
+        Options:<br>
+        <code>?channel=[channel_name]</code> - will set the chat channel to <code>[channel_name]</code><br>
+        <code>?blocked=[user1],[user2]</code> - will not show chat from <code>[user1]</code> or <code>[user2]</code><br>
+        <br>
+      </div>
       <div class="auth-container">
         <twitch-oauth-button
           v-if="!twitchAccessToken"
@@ -47,8 +53,8 @@
 </template>
 
 <script>
-import { ApiClient } from 'twitch';
-import { StaticAuthProvider } from 'twitch-auth';
+import { ApiClient } from '@twurple/api';
+import { StaticAuthProvider } from '@twurple/auth';
 
 import HorizontalTwitchChatScroller from "./components/HorizontalTwitchChatScroller.vue";
 import HorizontalStreamlabsScroller from "./components/HorizontalStreamlabsScroller.vue";
@@ -84,7 +90,7 @@ export default {
       const authProvider = new StaticAuthProvider(twitchClientID, this.twitchAccessToken);
       const apiClient = new ApiClient({ authProvider });
       if(!this.twitchChatChannelName) {
-        const me = await apiClient.kraken.users.getMe();
+        const me = await apiClient.users.getMe();
         this.twitchChatChannelName = me.name;
       }
     }
